@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <title>Warranty Control Page</title>
+
+    <link rel="shortcut icon" href="./images/fav.jpg" />
+    <link rel="stylesheet" href="./css/bootstrap.min.css" />
+    <link rel="stylesheet" href="./css/fontawsom-all.min.css" />
+    <link rel="stylesheet" type="text/css" href="./css/style.css" />
+    <style>
+      body {
+        margin: 0;
+        font-family: "Lato", sans-serif;
+      }
+
+      .sidebar {
+        margin: 0;
+        padding: 0;
+        width: 200px;
+        background-color: #f1f1f1;
+        position: fixed;
+        height: 100%;
+        overflow: auto;
+      }
+
+      .sidebar a {
+        display: block;
+        color: black;
+        padding: 16px;
+        text-decoration: none;
+      }
+
+      .sidebar a.active {
+        background-color: #863dd9;
+        color: white;
+      }
+
+      .sidebar a:hover:not(.active) {
+        background-color: #6685ca;
+        color: white;
+      }
+
+      div.content {
+        margin-left: 200px;
+        padding: 1px 16px;
+        height: 1000px;
+      }
+
+      @media screen and (max-width: 700px) {
+        .sidebar {
+          width: 100%;
+          height: auto;
+          position: relative;
+        }
+        .sidebar a {
+          float: left;
+        }
+        div.content {
+          margin-left: 0;
+        }
+      }
+
+      @media screen and (max-width: 400px) {
+        .sidebar a {
+          text-align: center;
+          float: none;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="sidebar">
+      <a class="active" href="/">Warranty Status</a>
+      <a class="" href="/add">Add New Device</a>
+      <a class="" href="/devicelist">Device List</a>
+    </div>
+
+    <div class="content">
+    <div class="container-fluid ">
+        <div class="no-pdding login-box">
+            <div class="row no-margin w-100 bklmj">
+                <div class="col-lg-6 col-md-6 log-det">
+                    <div class="row no-margin past mt-5 mb-4">
+                        <h2>Warranty Control</h2>
+                        <p>Please enter serial number of your device</p>
+                    </div>
+                    <div class="text-box-cont">
+                        <div class="input-group mb-3">
+                            <input id="serialNumber" type="text" class="form-control" placeholder="Serial Number" aria-label="Serial Number" aria-describedby="basic-addon1" required>
+                        </div>
+                        <div class="right-bkij mb-3">
+                            <button id="checkButton" class="btn btn-success btn-round">Check</button>
+                        </div>
+                        <br><br><br>
+                    </div>
+                    <div class="mt-5 mb-4" id="device_info">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <script src="/js/jquery-3.2.1.min.js"></script>
+    
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/script.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#checkButton').click(function () {
+                var serialNumber = $('#serialNumber').val();
+
+                if (serialNumber.trim() === "") {
+                    alert("Please enter a serial number.");
+                    return;
+                }
+
+                $.ajax({
+                    url: '/devices/search',
+                    type: 'GET',
+                    data: { serialNumber: serialNumber },
+                    dataType: 'json',
+                    success: function (response) {
+                        $('#device_info').empty();
+
+                        var deviceInfoHTML = `
+                            <div class="d-flex mb-2">
+                            <p style="font-size:medium; font-weight: bolder;">Device Name:&nbsp;&nbsp;&nbsp;</p>
+                            <p style="font-size:medium; font-weight: bolder;">${response.brand} ${response.model}</p>
+                            </div>
+                            <div class="d-flex mb-2">
+                                <p style="font-size:medium; font-weight: bolder;">Serial Number:&nbsp;&nbsp;&nbsp;</p>
+                                <p style="font-size:medium; font-weight: bolder;">${response.serialNumber}</p>
+                            </div>
+                            <div class="d-flex mb-2">
+                                <p style="font-size:medium; font-weight: bolder;">Purchase Date:&nbsp;&nbsp;&nbsp;</p>
+                                <p style="font-size:medium; font-weight: bolder;">${response.purchaseDate}</p>
+                            </div>
+                            <div class="d-flex mb-2">
+                                <p style="font-size:medium; font-weight: bolder;">Warranty Status:&nbsp;&nbsp;&nbsp;</p>
+                                <p style="font-size:medium; font-weight: bolder; ${ response.warrantyStatus == "Yes" ? "color:limegreen":"color:red" }">${response.warrantyStatus}</p>
+                            </div>
+                        `;
+
+                        $('#device_info').html(deviceInfoHTML);
+                    },
+                    error: function (error,response) {
+                      $('#device_info').empty();
+                      alert("Serial number entered incorrectly or no such serial number is registered");
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

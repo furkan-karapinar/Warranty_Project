@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <title>Warranty Control Page</title>
+
+    <link rel="shortcut icon" href="./images/fav.jpg" />
+    <link rel="stylesheet" href="./css/bootstrap.min.css" />
+    <link rel="stylesheet" href="./css/fontawsom-all.min.css" />
+    <link rel="stylesheet" type="text/css" href="./css/style.css" />
+    <style>
+      body {
+        margin: 0;
+        font-family: "Lato", sans-serif;
+      }
+
+      .sidebar {
+        margin: 0;
+        padding: 0;
+        width: 200px;
+        background-color: #f1f1f1;
+        position: fixed;
+        height: 100%;
+        overflow: auto;
+      }
+
+      .sidebar a {
+        display: block;
+        color: black;
+        padding: 16px;
+        text-decoration: none;
+      }
+
+      .sidebar a.active {
+        background-color: #863dd9;
+        color: white;
+      }
+
+      .sidebar a:hover:not(.active) {
+        background-color: #6685ca;
+        color: white;
+      }
+
+      div.content {
+        margin-left: 200px;
+        padding: 1px 16px;
+        height: 1000px;
+      }
+
+      @media screen and (max-width: 700px) {
+        .sidebar {
+          width: 100%;
+          height: auto;
+          position: relative;
+        }
+        .sidebar a {
+          float: left;
+        }
+        div.content {
+          margin-left: 0;
+        }
+      }
+
+      @media screen and (max-width: 400px) {
+        .sidebar a {
+          text-align: center;
+          float: none;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="sidebar">
+      <a class="" href="/">Warranty Status</a>
+      <a class="active" href="/add">Add New Device</a>
+      <a class="" href="/devicelist">Device List</a>
+    </div>
+
+    <div class="content">
+      <div class="container-fluid">
+        <div class="no-pdding login-box">
+          <div class="row no-margin w-100 bklmj">
+            <div class="col-lg-6 col-md-6 log-det">
+              <div class="row no-margin past mt-5 mb-4">
+                <h2>Add New Device</h2>
+                <p>Please enter all details of device</p>
+              </div>
+              <div class="text-box-cont">
+                <form id="warrantyForm" name="adddevice" method="post">
+                  <div class="input-group mb-3">
+                    <input
+                      type="text"
+                      class="form-control"
+                      placeholder="Brand"
+                      aria-label="Brand"
+                      aria-describedby="basic-addon1"
+                      id="brand"
+                      name="brand"
+                      required
+                    />
+                  </div>
+                  <div class="input-group mb-3">
+                    <input
+                      type="text"
+                      class="form-control"
+                      placeholder="Model"
+                      aria-label="Model"
+                      id="model"
+                      name="model"
+                      aria-describedby="basic-addon1"
+                      required
+                    />
+                  </div>
+                  <div class="input-group mb-3">
+                    <input
+                      id="serialNumber"
+                      type="text"
+                      class="form-control"
+                      placeholder="Serial Number"
+                      aria-label="Serial Number"
+                      name="serialNumber"
+                      aria-describedby="basic-addon1"
+                      required
+                    />
+                  </div>
+                  <div class="input-group mb-3">
+                    <input
+                      type="date"
+                      class="form-control"
+                      placeholder="Purchase Date"
+                      aria-label="Purchase Date"
+                      id="purchaseDate"
+                      name="purchaseDate"
+                      aria-describedby="basic-addon1"
+                      required
+                    />
+                  </div>
+                  <div class="input-group mb-3">
+                    <select
+                      class="form-control"
+                      id="warrantystatus"
+                      name="warrantystatus"
+                      required
+                    >
+                      <option value="Yes">Yes</option>
+                      <option value="No">No</option>
+                    </select>
+                  </div>
+                  <div class="right-bkij mb-3">
+                    <button
+                      id="checkButton"
+                      type="submit"
+                      class="btn btn-success btn-round"
+                    >
+                      Add
+                    </button>
+                  </div>
+                </form>
+                <div class="mt-5 mb-4" id="device_info"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="./js/jquery-3.2.1.min.js"></script>
+    <script src="./js/bootstrap.min.js"></script>
+    <script src="./js/script.js"></script>
+    <script>
+      // Set the current date as the default value for the purchase date input
+      document.addEventListener("DOMContentLoaded", (event) => {
+        const today = new Date().toLocaleDateString("en-CA");
+        document.getElementById("purchaseDate").value = today;
+      });
+    </script>
+
+    <script>
+      document
+        .getElementById("warrantyForm")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+
+          const deviceData = {
+            brand: document.getElementById("brand").value,
+            model: document.getElementById("model").value,
+            serialNumber: document.getElementById("serialNumber").value,
+            purchaseDate: document.getElementById("purchaseDate").value,
+            warrantyStatus: document.getElementById("warrantystatus").value,
+          };
+
+          fetch("/devices/add", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(deviceData),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              alert("Device added successfully!");
+          // Clear the form fields
+          document.getElementById("warrantyForm").reset();
+          const today = new Date().toLocaleDateString("en-CA");
+          document.getElementById("purchaseDate").value = today;
+            })
+            .catch((error,response) => {
+              // Handle errors if needed
+          console.error('There was a problem with the fetch operation:', error);
+            });
+        });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Device List</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <style>
+      .cont {
+        padding: 20px;
+      }
+      .modal-header {
+        background-color: #007bff;
+        color: white;
+      }
+      .modal-footer {
+        justify-content: space-between;
+      }
+    </style>
+    <style>
+      body {
+        margin: 0;
+        font-family: "Lato", sans-serif;
+      }
+
+      .sidebar {
+        margin: 0;
+        padding: 0;
+        width: 200px;
+        background-color: #f1f1f1;
+        position: fixed;
+        height: 100%;
+        overflow: auto;
+      }
+
+      .sidebar a {
+        display: block;
+        color: black;
+        padding: 16px;
+        text-decoration: none;
+      }
+
+      .sidebar a.active {
+        background-color: #863dd9;
+        color: white;
+      }
+
+      .sidebar a:hover:not(.active) {
+        background-color: #6685ca;
+        color: white;
+      }
+
+      div.content {
+        margin-left: 200px;
+        padding: 1px 16px;
+        height: 1000px;
+      }
+
+      @media screen and (max-width: 700px) {
+        .sidebar {
+          width: 100%;
+          height: auto;
+          position: relative;
+        }
+        .sidebar a {
+          float: left;
+        }
+        div.content {
+          margin-left: 0;
+        }
+      }
+
+      @media screen and (max-width: 400px) {
+        .sidebar a {
+          text-align: center;
+          float: none;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="sidebar">
+      <a class="" href="/">Warranty Status</a>
+      <a class="" href="/add">Add New Device</a>
+      <a class="active" href="/devicelist">Device List</a>
+    </div>
+
+    <div class="content">
+      <div class="container cont">
+        <h1 class="mb-4">Devices</h1>
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Brand</th>
+              <th>Model</th>
+              <th>Serial Number</th>
+              <th>Purchase Date</th>
+              <th>Warranty Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="deviceTableBody">
+            <!-- Cihazlar buraya yüklenecek -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Edit Modal -->
+      <div
+        class="modal fade"
+        id="editModal"
+        tabindex="-1"
+        aria-labelledby="editModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="editModalLabel">Edit Device</h5>
+              <button
+                type="button"
+                class="close"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <form id="editDeviceForm">
+                <input type="hidden" id="editDeviceId" />
+                <div class="form-group">
+                  <label for="editBrand">Brand</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="editBrand"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="editModel">Model</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="editModel"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="editSerialNumber">Serial Number</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="editSerialNumber"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="editPurchaseDate">Purchase Date</label>
+                  <input
+                    type="date"
+                    class="form-control"
+                    id="editPurchaseDate"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="editWarrantyStatus">Warranty Status</label>
+                  <select class="form-control" id="editWarrantyStatus" required>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                  </select>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                  Save changes
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.6.0/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+// Load devices on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadDevices();
+});
+
+// Function to load devices into the table
+function loadDevices() {
+    fetch('/devices/all')
+        .then(response => response.json())
+        .then(data => {
+            const tbody = document.getElementById('deviceTableBody');
+            tbody.innerHTML = '';
+            data.forEach(device => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${device.brand}</td>
+                    <td>${device.model}</td>
+                    <td>${device.serialNumber}</td>
+                    <td>${device.purchaseDate ? device.purchaseDate : 'N/A'}</td>
+                    <td>${device.warrantyStatus ? device.warrantyStatus : 'N/A'}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="editDevice(${device.id})">Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="confirmDeleteDevice(${device.id})">Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        });
+}
+
+// Function to confirm and delete device
+function confirmDeleteDevice(id) {
+    if (confirm("Are you sure you want to delete this device?")) {
+        deleteDevice(id);
+    }
+}
+
+// Function to edit device
+function editDevice(id) {
+    fetch(`/devices/${id}`)
+        .then(response => response.json())
+        .then(device => {
+            document.getElementById('editDeviceId').value = device.id;
+            document.getElementById('editBrand').value = device.brand;
+            document.getElementById('editModel').value = device.model;
+            document.getElementById('editSerialNumber').value = device.serialNumber;
+            document.getElementById('editPurchaseDate').value = device.purchaseDate;
+            document.getElementById('editWarrantyStatus').value = device.warrantyStatus;
+            $('#editModal').modal('show');
+        });
+}
+
+// Function to handle form submission for editing device
+document.getElementById('editDeviceForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const id = document.getElementById('editDeviceId').value;
+    const brand = document.getElementById('editBrand').value;
+    const model = document.getElementById('editModel').value;
+    const serialNumber = document.getElementById('editSerialNumber').value;
+    const purchaseDate = document.getElementById('editPurchaseDate').value;
+    const warrantyStatus = document.getElementById('editWarrantyStatus').value;
+
+    const device = {
+        brand: brand,
+        model: model,
+        serialNumber: serialNumber,
+        purchaseDate: purchaseDate,
+        warrantyStatus: warrantyStatus
+    };
+
+    fetch(`/devices/update/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(device)
+    })
+    .then(() => {
+        loadDevices();
+        $('#editModal').modal('hide');
+    });
+});
+
+// Function to delete device
+function deleteDevice(id) {
+    fetch(`/devices/delete/${id}`, {
+        method: 'DELETE'
+    })
+    .then(() => loadDevices());
+}
+
+    </script>
+  </body>
+</html>
